@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.example.retrofit.R
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -23,12 +21,7 @@ interface PunkService {
 }
 
 class MainActivity : AppCompatActivity() {
-    var retrofit = Retrofit.Builder()
-        .baseUrl("https://api.punkapi.com/v2/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
 
-    var punkService = retrofit.create(PunkService::class.java)
     private lateinit var viewModel: MainViewModel
 
 
@@ -37,22 +30,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-        retrieveRepos()
+        observerRepos()
+        viewModel.retrieveRepos("beers")
+
     }
 
 
-    fun retrieveRepos(){
-        lifecycleScope.launch{
-            try{
-                val repos = punkService.listRepos("beers")
-                showRepos(repos)
-            } catch (e: Exception){
-                Log.e("MainActivity", "Error retrieving repos: $e")
-                Snackbar.make(findViewById(R.id.main_view), "Error retrieving repos",
-                    Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Retry"){ retrieveRepos() }.show()
-            }
-        }
+    fun observerRepos(){
+
+        viewModel.repos.observe(this, { it -> showRepos(it)
+        })
     }
 
     fun showRepos(repoResults: BeersResult){
