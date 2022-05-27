@@ -5,12 +5,10 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.example.retrofit.R
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -36,10 +34,21 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun observerRepos(){
+    private fun observerRepos(){
 
-        viewModel.repos.observe(this, { it -> showRepos(it)
-        })
+        viewModel.repos.observe(this) {
+            showRepos(it)
+        }
+
+        viewModel.error.observe(this) {
+            Snackbar.make(
+                findViewById(R.id.main_view),
+                "Error:$it",
+                Snackbar.LENGTH_INDEFINITE
+            ).setAction("Retry") {
+                viewModel.retrieveRepos("beers")
+            }.show()
+        }
     }
 
     fun showRepos(repoResults: BeersResult){
