@@ -21,10 +21,19 @@ class MainViewModel : ViewModel() {
     val repos: LiveData<BeersResult>
        get() = _repos
 
+    private var _error = MutableLiveData<String>()
+    val error: LiveData<String>
+        get() = _error
+
 
     fun retrieveRepos(beername : String){
         CoroutineScope(Dispatchers.Main).launch {
-            _repos.value= punkService.listRepos(beername)
+            try {
+
+                _repos.value = punkService.listRepos(beername)
+            } catch (e : Exception){
+                _error.value = e.localizedMessage
+            }
         }
     }
 }
